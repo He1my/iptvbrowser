@@ -136,7 +136,7 @@ function normalizeServer(string $server): string
 
 function mapRequestToXtreamAction(string $request): string
 {
-    return match ($request) {
+    $actions = [
         'live-categories' => 'get_live_categories',
         'vod-categories' => 'get_vod_categories',
         'series-categories' => 'get_series_categories',
@@ -145,11 +145,16 @@ function mapRequestToXtreamAction(string $request): string
         'series-list' => 'get_series',
         'series-info' => 'get_series_info',
         'vod-info' => 'get_vod_info',
-        default => throw new RuntimeException('Unknown API request.'),
-    };
+    ];
+
+    if (!isset($actions[$request])) {
+        throw new RuntimeException('Unknown API request.');
+    }
+
+    return $actions[$request];
 }
 
-function xtreamApiRequest(string $server, string $username, string $password, array $params = []): mixed
+function xtreamApiRequest(string $server, string $username, string $password, array $params = [])
 {
     $query = array_merge([
         'username' => $username,
@@ -234,12 +239,19 @@ function buildStreamUrl(string $server, string $username, string $password, arra
         throw new RuntimeException('Stream ID is required.');
     }
 
-    return match ($type) {
-        'live' => $server . '/live/' . rawurlencode($username) . '/' . rawurlencode($password) . '/' . $id . '.' . ($extension ?: 'm3u8'),
-        'vod' => $server . '/movie/' . rawurlencode($username) . '/' . rawurlencode($password) . '/' . $id . '.' . ($extension ?: 'mp4'),
-        'series' => $server . '/series/' . rawurlencode($username) . '/' . rawurlencode($password) . '/' . $id . '.' . ($extension ?: 'mp4'),
-        default => throw new RuntimeException('Unknown stream type.'),
-    };
+    if ($type === 'live') {
+        return $server . '/live/' . rawurlencode($username) . '/' . rawurlencode($password) . '/' . $id . '.' . ($extension ?: 'm3u8');
+    }
+
+    if ($type === 'vod') {
+        return $server . '/movie/' . rawurlencode($username) . '/' . rawurlencode($password) . '/' . $id . '.' . ($extension ?: 'mp4');
+    }
+
+    if ($type === 'series') {
+        return $server . '/series/' . rawurlencode($username) . '/' . rawurlencode($password) . '/' . $id . '.' . ($extension ?: 'mp4');
+    }
+
+    throw new RuntimeException('Unknown stream type.');
 }
 
 function outputHlsPlaylist(string $server, string $username, string $password, array $query): void
@@ -291,7 +303,7 @@ function rewriteHlsPlaylist(string $playlist, string $baseUrl): string
 
     foreach ($lines as $line) {
         $trimmed = trim($line);
-        if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+        if ($trimmed === '' || startsWith($trimmed, '#')) {
             $rewritten[] = $line;
             continue;
         }
@@ -315,12 +327,17 @@ function resolveUrl(string $baseUrl, string $path): string
     }
 
     $origin = $base['scheme'] . '://' . $base['host'] . (isset($base['port']) ? ':' . $base['port'] : '');
-    if (str_starts_with($path, '/')) {
+    if (startsWith($path, '/')) {
         return $origin . $path;
     }
 
     $directory = isset($base['path']) ? preg_replace('#/[^/]*$#', '/', $base['path']) : '/';
     return $origin . $directory . $path;
+}
+
+function startsWith(string $value, string $prefix): bool
+{
+    return substr($value, 0, strlen($prefix)) === $prefix;
 }
 ?>
 <!doctype html>
