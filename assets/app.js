@@ -107,8 +107,16 @@ els.liveFormat.addEventListener("change", () => {
 els.server.addEventListener("input", saveConnectionConfig);
 els.username.addEventListener("input", saveConnectionConfig);
 els.password.addEventListener("input", saveConnectionConfig);
+els.server.addEventListener("change", saveConnectionConfig);
+els.username.addEventListener("change", saveConnectionConfig);
+els.password.addEventListener("change", saveConnectionConfig);
+els.server.addEventListener("blur", saveConnectionConfig);
+els.username.addEventListener("blur", saveConnectionConfig);
+els.password.addEventListener("blur", saveConnectionConfig);
 
-restoreConnectionConfig();
+if (restoreConnectionConfig()) {
+  connect().catch((error) => showToast(error.message));
+}
 
 async function connect() {
   setBusy(true);
@@ -452,6 +460,8 @@ function restoreConnectionConfig() {
   els.server.value = server;
   els.username.value = username;
   els.password.value = password;
+
+  return Boolean(server && username && password);
 }
 
 function saveConnectionConfig() {

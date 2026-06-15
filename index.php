@@ -32,6 +32,9 @@ if (isset($_GET['hls'])) {
     exit;
 }
 
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+
 if (isset($_GET['ajax'])) {
     header('Content-Type: application/json; charset=utf-8');
 
@@ -323,6 +326,16 @@ function startsWith(string $value, string $prefix): bool
 {
     return substr($value, 0, strlen($prefix)) === $prefix;
 }
+
+function assetUrl(string $path): string
+{
+    $fullPath = __DIR__ . '/' . ltrim($path, '/');
+    if (is_file($fullPath)) {
+        return $path . '?v=' . filemtime($fullPath);
+    }
+
+    return $path;
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -330,7 +343,7 @@ function startsWith(string $value, string $prefix): bool
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>IPTV Browser</title>
-    <link rel="stylesheet" href="assets/app.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('assets/app.css'), ENT_QUOTES) ?>">
 </head>
 <body>
     <main class="shell">
@@ -417,6 +430,6 @@ function startsWith(string $value, string $prefix): bool
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js"></script>
-    <script src="assets/app.js" defer></script>
+    <script src="<?= htmlspecialchars(assetUrl('assets/app.js'), ENT_QUOTES) ?>" defer></script>
 </body>
 </html>
