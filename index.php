@@ -1,27 +1,11 @@
 <?php
 declare(strict_types=1);
 
-$localConfig = loadLocalConfig(__DIR__ . '/config.local.php');
-
-define('DEFAULT_SERVER', (string)($localConfig['server'] ?? 'http://example.com'));
-define('DEFAULT_USERNAME', (string)($localConfig['username'] ?? ''));
-define('DEFAULT_PASSWORD', (string)($localConfig['password'] ?? ''));
-
-function loadLocalConfig(string $path): array
-{
-    if (!is_file($path)) {
-        return [];
-    }
-
-    $config = require $path;
-    return is_array($config) ? $config : [];
-}
-
 if (isset($_GET['hls'])) {
     try {
-        $server = normalizeServer((string)($_GET['server'] ?? DEFAULT_SERVER));
-        $username = trim((string)($_GET['username'] ?? DEFAULT_USERNAME));
-        $password = trim((string)($_GET['password'] ?? DEFAULT_PASSWORD));
+        $server = normalizeServer((string)($_GET['server'] ?? ''));
+        $username = trim((string)($_GET['username'] ?? ''));
+        $password = trim((string)($_GET['password'] ?? ''));
         $mode = (string)$_GET['hls'];
 
         if ($username === '' || $password === '') {
@@ -53,9 +37,9 @@ if (isset($_GET['ajax'])) {
 
     try {
         $payload = readJsonPayload();
-        $server = normalizeServer((string)($payload['server'] ?? DEFAULT_SERVER));
-        $username = trim((string)($payload['username'] ?? DEFAULT_USERNAME));
-        $password = trim((string)($payload['password'] ?? DEFAULT_PASSWORD));
+        $server = normalizeServer((string)($payload['server'] ?? ''));
+        $username = trim((string)($payload['username'] ?? ''));
+        $password = trim((string)($payload['password'] ?? ''));
         $request = (string)($_GET['ajax'] ?? '');
 
         if ($username === '' || $password === '') {
@@ -359,15 +343,15 @@ function startsWith(string $value, string $prefix): bool
             <form id="connectionForm" class="connection-form">
                 <label>
                     <span>Server</span>
-                    <input id="serverInput" name="server" type="url" autocomplete="url" value="<?= htmlspecialchars(DEFAULT_SERVER, ENT_QUOTES) ?>" required>
+                    <input id="serverInput" name="server" type="url" autocomplete="url" value="" placeholder="Enter server URL" required>
                 </label>
                 <label>
                     <span>Username</span>
-                    <input id="usernameInput" name="username" autocomplete="username" value="<?= htmlspecialchars(DEFAULT_USERNAME, ENT_QUOTES) ?>" required>
+                    <input id="usernameInput" name="username" autocomplete="username" value="" placeholder="Enter username" required>
                 </label>
                 <label>
                     <span>Password</span>
-                    <input id="passwordInput" name="password" type="password" autocomplete="current-password" value="<?= htmlspecialchars(DEFAULT_PASSWORD, ENT_QUOTES) ?>" required>
+                    <input id="passwordInput" name="password" type="password" autocomplete="current-password" value="" placeholder="Enter password" required>
                 </label>
                 <button class="primary-button" type="submit">Connect</button>
             </form>
@@ -432,13 +416,6 @@ function startsWith(string $value, string $prefix): bool
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-    <script>
-        window.IPTV_DEFAULTS = {
-            server: <?= json_encode(DEFAULT_SERVER, JSON_THROW_ON_ERROR) ?>,
-            username: <?= json_encode(DEFAULT_USERNAME, JSON_THROW_ON_ERROR) ?>,
-            password: <?= json_encode(DEFAULT_PASSWORD, JSON_THROW_ON_ERROR) ?>
-        };
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js"></script>
     <script src="assets/app.js" defer></script>
 </body>

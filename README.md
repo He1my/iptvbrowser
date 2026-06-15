@@ -16,8 +16,7 @@ http://127.0.0.1:8000
 
 ## Defaults
 
-Local defaults are read from `config.local.php`, which is intentionally ignored by git.
-Use `config.example.php` as the template when setting up another machine.
+The app starts blank and restores the last entered connection settings from the browser's local storage.
 
 ## API paths
 

@@ -1,7 +1,7 @@
 const state = {
-  server: window.IPTV_DEFAULTS.server,
-  username: window.IPTV_DEFAULTS.username,
-  password: window.IPTV_DEFAULTS.password,
+  server: "",
+  username: "",
+  password: "",
   connected: false,
   section: "live",
   categoryId: "",
@@ -441,9 +441,9 @@ function setBusy(isBusy) {
 
 function restoreConnectionConfig() {
   const saved = readSavedConnectionConfig();
-  const server = saved.server || state.server;
-  const username = saved.username || state.username;
-  const password = saved.password || state.password;
+  const server = saved.server || "";
+  const username = saved.username || "";
+  const password = saved.password || "";
 
   state.server = server;
   state.username = username;
