@@ -14,6 +14,8 @@ const state = {
   hls: null,
 };
 
+const STORAGE_KEY = "iptv-browser:last-config";
+
 const els = {
   form: document.querySelector("#connectionForm"),
   server: document.querySelector("#serverInput"),
@@ -66,6 +68,7 @@ els.form.addEventListener("submit", async (event) => {
   state.server = els.server.value.trim();
   state.username = els.username.value.trim();
   state.password = els.password.value.trim();
+  saveConnectionConfig();
   await connect();
 });
 
@@ -100,6 +103,12 @@ els.categoryFilter.addEventListener("input", () => {
 els.liveFormat.addEventListener("change", () => {
   state.liveFormat = els.liveFormat.value;
 });
+
+els.server.addEventListener("input", saveConnectionConfig);
+els.username.addEventListener("input", saveConnectionConfig);
+els.password.addEventListener("input", saveConnectionConfig);
+
+restoreConnectionConfig();
 
 async function connect() {
   setBusy(true);
@@ -428,6 +437,55 @@ function formatExpiry(value) {
 
 function setBusy(isBusy) {
   document.body.classList.toggle("busy", isBusy);
+}
+
+function restoreConnectionConfig() {
+  const saved = readSavedConnectionConfig();
+  const server = saved.server || state.server;
+  const username = saved.username || state.username;
+  const password = saved.password || state.password;
+
+  state.server = server;
+  state.username = username;
+  state.password = password;
+
+  els.server.value = server;
+  els.username.value = username;
+  els.password.value = password;
+}
+
+function saveConnectionConfig() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      server: els.server.value.trim(),
+      username: els.username.value.trim(),
+      password: els.password.value.trim(),
+    }));
+  } catch (error) {
+    // Ignore storage failures in private mode or restricted browsers.
+  }
+}
+
+function readSavedConnectionConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+
+    return {
+      server: typeof parsed.server === "string" ? parsed.server.trim() : "",
+      username: typeof parsed.username === "string" ? parsed.username.trim() : "",
+      password: typeof parsed.password === "string" ? parsed.password.trim() : "",
+    };
+  } catch (error) {
+    return {};
+  }
 }
 
 function showToast(message) {
