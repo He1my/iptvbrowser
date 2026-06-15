@@ -3,16 +3,17 @@ declare(strict_types=1);
 
 if (isset($_GET['hls'])) {
     try {
-        $server = normalizeServer((string)($_GET['server'] ?? ''));
-        $username = trim((string)($_GET['username'] ?? ''));
-        $password = trim((string)($_GET['password'] ?? ''));
         $mode = (string)$_GET['hls'];
 
-        if ($username === '' || $password === '') {
-            throw new RuntimeException('Username and password are required.');
-        }
-
         if ($mode === 'playlist') {
+            $server = normalizeServer((string)($_GET['server'] ?? ''));
+            $username = trim((string)($_GET['username'] ?? ''));
+            $password = trim((string)($_GET['password'] ?? ''));
+
+            if ($username === '' || $password === '') {
+                throw new RuntimeException('Username and password are required.');
+            }
+
             outputHlsPlaylist($server, $username, $password, $_GET);
             exit;
         }
